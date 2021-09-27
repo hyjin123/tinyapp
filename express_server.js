@@ -3,12 +3,15 @@ const app = express(); // creating a server using express
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser"); // body-parser allows data (buffer) to be readable
 app.use(bodyParser.urlencoded({extended:true}));
-app.set("view engine", "ejs");
+
+app.set("view engine", "ejs"); // setting the view engine as EJS
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+console.log(generateRandomString());
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -31,6 +34,12 @@ app.get("/urls", (req, res) => {
 // route to present the form to the user
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+})
+
+// route to receive the form submission
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok");
 })
 
 // route to display long URL along with short URL (+ link to create new URL)
