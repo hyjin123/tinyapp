@@ -26,7 +26,15 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 })
 
+app.get("/urls/:shortURL", (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  res.render("urls_show", templateVars);
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+//bodyParser - another way for browser to give server information. not through URL but for ex. form.
+//browser to server - req.params (giving info from browser to server using the url)
+// server to browser - templateVars (it packages the varibales and gives to for ex. urls_show. the view needs those variables to display using EJS)
