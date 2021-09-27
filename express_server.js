@@ -1,7 +1,8 @@
 const express = require("express");
 const app = express(); // creating a server using express
 const PORT = 8080; // default port 8080
-
+const bodyParser = require("body-parser"); // body-parser allows data (buffer) to be readable
+app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -21,13 +22,18 @@ app.get("/hello", (req,res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// displays a table of the URL Database (long and short URLS)
+// route to display a table of the URL Database (long and short URLS)
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 })
 
-// displays long URL along with short URL (+ link to create new URL)
+// route to present the form to the user
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+})
+
+// route to display long URL along with short URL (+ link to create new URL)
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
