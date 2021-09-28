@@ -11,8 +11,6 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-console.log(urlDatabase)
-
 // function to genereate a "unique" shortURL (6 characters)
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
