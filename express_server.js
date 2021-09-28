@@ -41,7 +41,6 @@ app.get("/urls/new", (req, res) => {
 
 // route to receive the form submission
 app.post("/urls", (req, res) => {
-  console.log(req.body); // console logs the body (key-value pair)
   const newShortUrl = generateRandomString(); // generate a new short URL
   urlDatabase[newShortUrl] = req.body.longURL // add the key value pair to the URL Database
   res.redirect(`/urls/${newShortUrl}`); // redirect to the new URL page
@@ -59,10 +58,17 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 })
 
-// route to remove a URL and redict to the /urls page
+// route to remove a URL and redirect to the /urls page
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL
+  const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL]; // delete the shortURL property in the database
+  res.redirect("/urls");
+})
+
+// route to update a URL and redirect to the /urls page
+app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = req.body.longURL;
   res.redirect("/urls");
 })
 
