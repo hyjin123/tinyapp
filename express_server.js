@@ -68,7 +68,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // route to update a URL and redirect to the /urls page
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = req.body.longURL; // update the longURL of the shortURL in the database
   res.redirect("/urls");
 })
 
