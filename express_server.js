@@ -11,7 +11,12 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-console.log(generateRandomString());
+console.log(urlDatabase)
+
+// function to genereate a "unique" shortURL (6 characters)
+function generateRandomString() {
+  return Math.random().toString(36).substr(2, 6);
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -38,8 +43,10 @@ app.get("/urls/new", (req, res) => {
 
 // route to receive the form submission
 app.post("/urls", (req, res) => {
-  console.log(req.body);
-  res.send("Ok");
+  console.log(req.body); // console logs the body (key-value pair)
+  const newShortUrl = generateRandomString(); // generate a new short URL
+  urlDatabase[newShortUrl] = req.body.longURL // add the key value pair to the URL Database
+  res.redirect(`/urls/${newShortUrl}`); // redirect to the new URL page
 })
 
 // route to display long URL along with short URL (+ link to create new URL)
@@ -47,6 +54,12 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
+
+// route to handle shortURL requests, clicking on the shortURL will lead to the longURL
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
