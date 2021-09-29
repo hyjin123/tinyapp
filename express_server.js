@@ -97,6 +97,17 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// route to receive the form submission
+app.post("/urls", (req, res) => {
+  // if none logged in user adds a new url, return error message
+  if (!req.cookies["user_id"]) {
+    return res.status(400).send("You must be logged in to add!");
+  }
+  const newShortUrl = generateRandomString(); // generate a new short URL
+  urlDatabase[newShortUrl] = req.body.longURL // add the key value pair to the URL Database
+  res.redirect(`/urls/${newShortUrl}`); // redirect to the new URL page
+});
+
 // route to present the form to the user
 app.get("/urls/new", (req, res) => {
   // if there is a user logged in, redirect to /urls/login
@@ -107,13 +118,6 @@ app.get("/urls/new", (req, res) => {
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
-});
-
-// route to receive the form submission
-app.post("/urls", (req, res) => {
-  const newShortUrl = generateRandomString(); // generate a new short URL
-  urlDatabase[newShortUrl] = req.body.longURL // add the key value pair to the URL Database
-  res.redirect(`/urls/${newShortUrl}`); // redirect to the new URL page
 });
 
 // route to display long URL along with short URL (+ link to create new URL)
@@ -141,6 +145,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // route to update a URL and redirect to the /urls page
 app.post("/urls/:shortURL", (req, res) => {
+
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL] = req.body.longURL; // update the longURL of the shortURL in the database
   res.redirect("/urls");
