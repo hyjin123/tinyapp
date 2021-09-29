@@ -59,6 +59,17 @@ const checkIfEmptyString = function(email, password) {
 const findUserByEmail = function(email) {
   for (const id in users) {
     if (users[id].email === email) {
+      return id;
+    }
+  }
+  return false;
+}
+
+//HELPER FUNCTION #5
+// check to see if the password given matches the password (same email) in the database
+const checkPassword = function(email, password) {
+  for (const id in users) {
+    if (users[id].email === email && users[id].password === password) {
       return true;
     }
   }
@@ -131,12 +142,6 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-// route to handle a POST to /login and set cookies
-app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
-});
-
 // route to handle a POST to /logout and clears the username cookie
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
@@ -181,6 +186,23 @@ app.get("/login", (req, res) => {
   res.render("urls_login", templateVars);
 });
 
+// route to handle a POST to /login and set cookies
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  // if email is not in the database, return a 403 status code
+  if(!findUserByEmail(email)) {
+    return res.status(403).send("Email cannot be found");
+  }
+  // if password is not correct, return a 403 status code
+  if(!checkPassword(email, password)) {
+    return res.status(403).send("Wrong password!");
+  }
+  // find the ID using the helper function
+  const id = findUserByEmail(email);
+  res.cookie("user_id", id);
+  res.redirect("/urls");
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
