@@ -149,7 +149,6 @@ app.get("/register", (req, res) => {
     user: users[req.cookies["user_id"]]
    };
   res.render("urls_register", templateVars);
-  // res.redirect("/urls");
 });
 
 // route to handle the registration form data
@@ -171,8 +170,17 @@ app.post("/register", (req, res) => {
   users[id] = user;
   // set user_id cookie contraining the user's newly generated ID
   res.cookie("user_id", id);
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
+
+// route to present the login page to the user
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    user: users[req.cookies["user_id"]]
+   };
+  res.render("urls_login", templateVars);
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
