@@ -74,9 +74,10 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-// route to handle a POST to /login
+// route to handle a POST to /login and set cookies
 app.post("/login", (req, res) => {
-  res.send("hello")
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
 });
 
 app.listen(PORT, () => {
