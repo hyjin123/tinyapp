@@ -8,12 +8,13 @@ app.use(cookieParser());
 
 app.set("view engine", "ejs"); // setting the view engine as EJS
 
+// storing shortURL and longURL (URL Database)
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-// storing the users and their log in information
+// storing the users and their log in information (Users Database)
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -27,20 +28,41 @@ const users = {
   }
 }
 
-// HELPER FUNCTIONS
+// HELPER FUNCTION #1
 // Genereate a "unique" shortURL (6 characters)
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
 }
 
+// HELPER FUNCTION #2
 // Create a new user (registration) object with given id, email, and password
-function createUser(id, email, password) {
+const createUser = function(id, email, password) {
   const user = {
     id,
     email,
     password
   };
   return user;
+}
+
+// HELPER FUNCTION #3
+// Check if the email or the passwords are empty strings.
+const checkIfEmptyString = function(email, password) {
+  if (email === "" || password === "") {
+    return true;
+  }
+  return false;
+}
+
+// HELPER FUNCTION #4
+// check to see if an email is already in the users database
+const findUserByEmail = function(email) {
+  for (const id in users) {
+    if (users[id].email === email) {
+      return true;
+    }
+  }
+  return false;
 }
 
 app.get("/", (req, res) => {
@@ -135,6 +157,14 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  // if email or password is empty, send an error message
+  if (checkIfEmptyString(email, password)) {
+    return res.status(400).send("Email or Password cannot be empty");
+  }
+  // if someone registers with existing email, send an error message
+  if (findUserByEmail(email)) {
+    return res.status(400).send("Email already exists");
+  }
   // use the helper function create a user object
   const user = createUser(id, email, password);
   // add the new user object to the users database
@@ -147,7 +177,6 @@ app.post("/register", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
 
 //bodyParser - another way for browser to give server information. not through URL but for ex. form.
 //browser to server - req.params (giving info from browser to server using the url)
