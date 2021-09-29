@@ -99,6 +99,10 @@ app.get("/urls", (req, res) => {
 
 // route to present the form to the user
 app.get("/urls/new", (req, res) => {
+  // if there is a user logged in, redirect to /urls/login
+  if (!req.cookies["user_id"]) {
+    return res.redirect("/login");
+  }
   const templateVars = {
     user: users[req.cookies["user_id"]]
   };
