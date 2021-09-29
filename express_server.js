@@ -18,21 +18,21 @@ const urlDatabase = {
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    email: "a@example.com", 
+    password: "123"
   },
  "user2RandomID": {
     id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
+    email: "b@example.com", 
+    password: "123"
   }
-}
+};
 
 // HELPER FUNCTION #1
 // Genereate a "unique" shortURL (6 characters)
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
-}
+};
 
 // HELPER FUNCTION #2
 // Create a new user (registration) object with given id, email, and password
@@ -43,7 +43,7 @@ const createUser = function(id, email, password) {
     password
   };
   return user;
-}
+};
 
 // HELPER FUNCTION #3
 // Check if the email or the passwords are empty strings.
@@ -52,7 +52,7 @@ const checkIfEmptyString = function(email, password) {
     return true;
   }
   return false;
-}
+};
 
 // HELPER FUNCTION #4
 // check to see if an email is already in the users database
@@ -63,9 +63,9 @@ const findUserByEmail = function(email) {
     }
   }
   return false;
-}
+};
 
-//HELPER FUNCTION #5
+// HELPER FUNCTION #5
 // check to see if the password given matches the password (same email) in the database
 const checkPassword = function(email, password) {
   for (const id in users) {
@@ -74,7 +74,7 @@ const checkPassword = function(email, password) {
     }
   }
   return false;
-}
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -150,6 +150,10 @@ app.post("/logout", (req, res) => {
 
 // route to present the register page/form to the user
 app.get("/register", (req, res) => {
+  // if there is a user logged in, redirect to /urls
+  if (req.cookies["user_id"]) {
+    return res.redirect("/urls");
+  }
   const templateVars = { 
     user: users[req.cookies["user_id"]]
    };
@@ -180,6 +184,10 @@ app.post("/register", (req, res) => {
 
 // route to present the login page to the user
 app.get("/login", (req, res) => {
+  // if there is a user logged in, redirect to /urls
+  if (req.cookies["user_id"]) {
+    return res.redirect("/urls");
+  }
   const templateVars = { 
     user: users[req.cookies["user_id"]]
    };
