@@ -90,6 +90,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
+// route to handle a POST to /logout and clears the username cookie
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls");
+})
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
