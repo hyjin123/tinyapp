@@ -139,6 +139,9 @@ app.post("/register", (req, res) => {
   const user = createUser(id, email, password);
   // add the new user object to the users database
   users[id] = user;
+  // set user_id cookie contraining the user's newly generated ID
+  res.cookie("user_id", id);
+  res.redirect("/urls")
   console.log(users);
 });
 
