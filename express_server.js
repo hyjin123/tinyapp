@@ -32,13 +32,19 @@ app.get("/hello", (req,res) => {
 
 // route to display a table of the URL Database (long and short URLS)
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    urls: urlDatabase,
+    username: req.cookies["username"]
+   };
   res.render("urls_index", templateVars);
 });
 
 // route to present the form to the user
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_new", templateVars);
 });
 
 // route to receive the form submission
@@ -50,7 +56,11 @@ app.post("/urls", (req, res) => {
 
 // route to display long URL along with short URL (+ link to create new URL)
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { 
+    shortURL: req.params.shortURL, 
+    longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies["username"]
+   };
   res.render("urls_show", templateVars);
 });
 
