@@ -27,9 +27,20 @@ const users = {
   }
 }
 
-// function to genereate a "unique" shortURL (6 characters)
+// HELPER FUNCTIONS
+// Genereate a "unique" shortURL (6 characters)
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
+}
+
+// Create a new user (registration) object with given id, email, and password
+function createUser(id, email, password) {
+  const user = {
+    id,
+    email,
+    password
+  };
+  return user;
 }
 
 app.get("/", (req, res) => {
@@ -108,7 +119,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
-})
+});
 
 // route to present the register page/form to the user
 app.get("/register", (req, res) => {
@@ -117,7 +128,19 @@ app.get("/register", (req, res) => {
    };
   res.render("urls_register", templateVars);
   // res.redirect("/urls");
-})
+});
+
+// route to handle the registration form data
+app.post("/register", (req, res) => {
+  const id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  // use the helper function create a user object
+  const user = createUser(id, email, password);
+  // add the new user object to the users database
+  users[id] = user;
+  console.log(users);
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
