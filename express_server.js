@@ -59,7 +59,7 @@ app.get("/hello", (req,res) => {
 app.get("/urls", (req, res) => {
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
    };
   res.render("urls_index", templateVars);
 });
@@ -67,7 +67,7 @@ app.get("/urls", (req, res) => {
 // route to present the form to the user
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   };
   res.render("urls_new", templateVars);
 });
@@ -84,7 +84,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
    };
   res.render("urls_show", templateVars);
 });
@@ -117,14 +117,14 @@ app.post("/login", (req, res) => {
 
 // route to handle a POST to /logout and clears the username cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
 // route to present the register page/form to the user
 app.get("/register", (req, res) => {
   const templateVars = { 
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
    };
   res.render("urls_register", templateVars);
   // res.redirect("/urls");
@@ -142,7 +142,6 @@ app.post("/register", (req, res) => {
   // set user_id cookie contraining the user's newly generated ID
   res.cookie("user_id", id);
   res.redirect("/urls")
-  console.log(users);
 });
 
 app.listen(PORT, () => {
