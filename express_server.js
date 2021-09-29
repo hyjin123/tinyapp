@@ -13,6 +13,20 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// storing the users and their log in information
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 // function to genereate a "unique" shortURL (6 characters)
 function generateRandomString() {
   return Math.random().toString(36).substr(2, 6);
@@ -96,9 +110,19 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 })
 
+// route to present the register page/form to the user
+app.get("/register", (req, res) => {
+  const templateVars = { 
+    username: req.cookies["username"]
+   };
+  res.render("urls_register", templateVars);
+  // res.redirect("/urls");
+})
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
 
 //bodyParser - another way for browser to give server information. not through URL but for ex. form.
 //browser to server - req.params (giving info from browser to server using the url)
