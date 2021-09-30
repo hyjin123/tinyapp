@@ -82,6 +82,17 @@ const checkPassword = function(email, password) {
   return false;
 };
 
+// HELPER FUNCTION #6
+// check to see if shortURL exists in the database
+const checkShortUrl = function(shortURL) {
+  for (const url in urlDatabase) {
+    if(url === shortURL) {
+      return true;
+    }
+    return false;
+  }
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -96,6 +107,10 @@ app.get("/hello", (req,res) => {
 
 // route to display a table of the URL Database (long and short URLS)
 app.get("/urls", (req, res) => {
+  // if not logged in, it should display a message
+  // if (!req.cookies["user_id"]) {
+  //   return res.status(400).send("Log in or Register first to view this page");
+  // }
   const templateVars = { 
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
@@ -143,6 +158,10 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // route to handle shortURL requests, clicking on the shortURL will lead to the longURL
 app.get("/u/:shortURL", (req, res) => {
+  // if the :shortURL does not exist in the database, throw an error
+  if (!checkShortUrl(req.params.shortURL)) {
+    return res.status(400).send("This shortURL does not exist!");
+  }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
