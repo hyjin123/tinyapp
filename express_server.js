@@ -25,12 +25,12 @@ app.set("view engine", "ejs"); // setting the view engine as EJS
 // storing shortURL and longURL (URL Database)
 const urlDatabase = {
   b6UTxQ: {
-      longURL: "https://www.tsn.ca",
-      userID: "userRandomID"
+    longURL: "https://www.tsn.ca",
+    userID: "userRandomID"
   },
   i3BoGr: {
-      longURL: "https://www.google.ca",
-      userID: "userRandomID"
+    longURL: "https://www.google.ca",
+    userID: "userRandomID"
   }
 };
 
@@ -38,7 +38,12 @@ const urlDatabase = {
 const users = {};
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const id = req.session.user_id;
+  const user = users[id];
+  if (!user) {
+    return res.redirect("/login");
+  }
+  return res.redirect("/urls");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -57,29 +62,33 @@ app.get("/urls", (req, res) => {
   const templateVars = {
     urls: filteredDatabase,
     user: users[req.session.user_id]
-   };
+  };
   res.render("urls_index", templateVars);
 });
 
 // route to receive the form submission
 app.post("/urls", (req, res) => {
   // if none logged in user adds a new url, return error message
-  if (!req.session.user_id) {
+  const id = req.session.user_id;
+  const user = users[id];
+  if (!user) {
     return res.status(400).send("You must be logged in to add URL!");
   }
   const newShortUrl = generateRandomString(); // generate a new short URL
-   // add the key value pairs to the URL Database
+  // add the key value pairs to the URL Database
   urlDatabase[newShortUrl] = {
     longURL: req.body.longURL,
     userID: req.session.user_id
-  }
+  };
   res.redirect(`/urls/${newShortUrl}`); // redirect to the new URL page
 });
 
 // route to present the form to the user
 app.get("/urls/new", (req, res) => {
   // if there is a user logged in, redirect to /urls/login
-  if (!req.session.user_id) {
+  const id = req.session.user_id;
+  const user = users[id];
+  if (!user) {
     return res.redirect("/login");
   }
   const templateVars = {
@@ -100,10 +109,10 @@ app.get("/urls/:shortURL", (req, res) => {
   const filteredDatabase = urlsForUser(id, urlDatabase);
   const templateVars = {
     urls: filteredDatabase,
-    shortURL: req.params.shortURL, 
+    shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.session.user_id]
-   };
+  };
   res.render("urls_show", templateVars);
 });
 
@@ -111,39 +120,48 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   // if the shortURL does not exist, return a error message
-  if(checkShortUrl(shortURL, urlDatabase)) {
+  if (checkShortUrl(shortURL, urlDatabase)) {
     const longURL = urlDatabase[shortURL].longURL;
     return res.redirect(longURL);
   }
   res.status(400).send("This short URL does not exist!");
 });
 
-// route to remove a URL and redirect to the /urls page
-app.post("/urls/:shortURL/delete", (req, res) => {
-  const id = req.session.user_id;
-  // filter through the URL database
-  const filteredDatabase = urlsForUser(id, urlDatabase);
-  const shortURL = req.params.shortURL;
-  // check if shortURL is in the filtered database, if not, throw error
-  if (!filteredDatabase[shortURL]) {
-    return res.status(400).send("You cannot delete this.");
-  }
-  delete urlDatabase[shortURL]; // delete the shortURL property in the database
-  res.redirect("/urls");
-});
-
 // route to update a URL and redirect to the /urls page
 app.post("/urls/:shortURL", (req, res) => {
+  // if none logged in, return error message
   const id = req.session.user_id;
+  const user = users[id];
+  if (!user) {
+    return res.status(400).send("You must be logged in to change URL");
+  }
   // filter through the URL database
   const filteredDatabase = urlsForUser(id, urlDatabase);
   const shortURL = req.params.shortURL;
-  console.log(filteredDatabase)
+  console.log(filteredDatabase);
   // check if shortURL is in the filtered database, if not, throw error
   if (!filteredDatabase[shortURL]) {
     return res.status(400).send("You cannot edit this.");
   }
   urlDatabase[shortURL].longURL = req.body.longURL; // update the longURL of the shortURL in the database
+  res.redirect("/urls");
+});
+
+// route to remove a URL and redirect to the /urls page
+app.post("/urls/:shortURL/delete", (req, res) => {
+  const id = req.session.user_id;
+  const user = users[id];
+  if (!user) {
+    return res.status(400).send("You cannot delete this!");
+  }
+  // filter through the URL database
+  const filteredDatabase = urlsForUser(id, urlDatabase);
+  const shortURL = req.params.shortURL;
+  // check if shortURL is in the filtered database, if not, throw error
+  if (!filteredDatabase[shortURL]) {
+    return res.status(400).send("You cannot delete this!");
+  }
+  delete urlDatabase[shortURL]; // delete the shortURL property in the database
   res.redirect("/urls");
 });
 
@@ -156,12 +174,14 @@ app.post("/logout", (req, res) => {
 // route to present the register page/form to the user
 app.get("/register", (req, res) => {
   // if there is a user logged in, redirect to /urls
-  if (req.session.user_id) {
+  const id = req.session.user_id;
+  const user = users[id];
+  if (user) {
     return res.redirect("/urls");
   }
-  const templateVars = { 
+  const templateVars = {
     user: users[req.session.user_id]
-   };
+  };
   res.render("urls_register", templateVars);
 });
 
@@ -191,12 +211,14 @@ app.post("/register", (req, res) => {
 // route to present the login page to the user
 app.get("/login", (req, res) => {
   // if there is a user logged in, redirect to /urls
-  if (req.session.user_id) {
+  const id = req.session.user_id;
+  const user = users[id];
+  if (user) {
     return res.redirect("/urls");
   }
-  const templateVars = { 
+  const templateVars = {
     user: users[req.session.user_id]
-   };
+  };
   res.render("urls_login", templateVars);
 });
 
@@ -204,12 +226,16 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  // if email or password is empty, send an error message
+  if (checkIfEmptyString(email, password)) {
+    return res.status(400).send("Email or Password cannot be empty");
+  }
   // if email is not in the database, return a 403 status code
-  if(!findUserByEmail(email, users)) {
+  if (!findUserByEmail(email, users)) {
     return res.status(403).send("Email cannot be found");
   }
   // if password is not correct, return a 403 status code
-  if(!checkPassword(email, password, users)) {
+  if (!checkPassword(email, password, users)) {
     return res.status(403).send("Wrong password!");
   }
   // find the ID using the helper function
