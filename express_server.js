@@ -12,11 +12,11 @@ app.set("view engine", "ejs"); // setting the view engine as EJS
 const urlDatabase = {
   b6UTxQ: {
       longURL: "https://www.tsn.ca",
-      userID: "aJ48lW"
+      userID: "userRandomID"
   },
   i3BoGr: {
       longURL: "https://www.google.ca",
-      userID: "aJ48lW"
+      userID: "userRandomID"
   }
 };
 
@@ -173,8 +173,12 @@ app.get("/urls/:shortURL", (req, res) => {
 // route to handle shortURL requests, clicking on the shortURL will lead to the longURL
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
-  res.redirect(longURL);
+  // if the shortURL does not exist, return a error message
+  if(checkShortUrl(shortURL)) {
+    const longURL = urlDatabase[shortURL].longURL;
+    return res.redirect(longURL);
+  }
+  res.status(400).send("This short URL does not exist!");
 });
 
 // route to remove a URL and redirect to the /urls page
