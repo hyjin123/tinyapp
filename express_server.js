@@ -213,7 +213,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // route to handle a POST to /logout and clears the user_id cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls");
 });
 
