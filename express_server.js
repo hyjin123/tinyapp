@@ -2,9 +2,12 @@ const express = require("express");
 const app = express(); // creating a server using express
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser"); // body-parser allows data (buffer) to be readable
-app.use(bodyParser.urlencoded({extended:true}));
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcryptjs");
+
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(cookieParser());
+
 
 app.set("view engine", "ejs"); // setting the view engine as EJS
 
@@ -22,16 +25,7 @@ const urlDatabase = {
 
 // storing the users and their log in information (Users Database)
 const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "a@example.com", 
-    password: "123"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "b@example.com", 
-    password: "123"
-  }
+
 };
 
 // HELPER FUNCTION #1
@@ -42,11 +36,11 @@ function generateRandomString() {
 
 // HELPER FUNCTION #2
 // Create a new user (registration) object with given id, email, and password
-const createUser = function(id, email, password) {
+const createUser = function(id, email, hashedPassword) {
   const user = {
     id,
     email,
-    password
+    hashedPassword
   };
   return user;
 };
@@ -75,7 +69,7 @@ const findUserByEmail = function(email) {
 // check to see if the password given matches the password (same email) in the database
 const checkPassword = function(email, password) {
   for (const id in users) {
-    if (users[id].email === email && users[id].password === password) {
+    if (users[id].email === email && bcrypt.compareSync(password, users[id].hashedPassword)) {
       return true;
     }
   }
@@ -237,6 +231,7 @@ app.post("/register", (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   // if email or password is empty, send an error message
   if (checkIfEmptyString(email, password)) {
     return res.status(400).send("Email or Password cannot be empty");
@@ -246,7 +241,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email already exists");
   }
   // use the helper function create a user object
-  const user = createUser(id, email, password);
+  const user = createUser(id, email, hashedPassword);
   // add the new user object to the users database
   users[id] = user;
   // set user_id cookie contraining the user's newly generated ID
