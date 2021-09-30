@@ -162,7 +162,11 @@ app.get("/urls/new", (req, res) => {
 
 // route to display long URL along with short URL (+ link to create new URL)
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
+  const id = req.cookies["user_id"];
+  // filter through the URL database
+  const filteredDatabase = urlsForUser(id);
+  const templateVars = {
+    urls: filteredDatabase,
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL].longURL,
     user: users[req.cookies["user_id"]]

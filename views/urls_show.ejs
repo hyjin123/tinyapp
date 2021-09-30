@@ -13,6 +13,8 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
+      <% if(user) {%>
+        <% if(urls[shortURL]) { %>
         <h5 class="card-title">TinyURL for: <%= longURL %> </h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
@@ -25,6 +27,12 @@
           <button type="submit" class="btn btn-primary">Submit</button>
         </div>
       </form>
+      <% } else { %>
+        <p>This short URL does not belong to you. You won't have access</p>
+      <% } %>
+    <% } else { %>
+      <p>Please Login or Register to view this page.</p>
+    <% } %>  
     </div>
   </div>
   <!-- Bootstrap JS -->
