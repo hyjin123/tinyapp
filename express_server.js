@@ -59,7 +59,7 @@ const checkIfEmptyString = function(email, password) {
 
 // HELPER FUNCTION #4
 // check to see if an email is already in the users database
-const findUserByEmail = function(email) {
+const findUserByEmail = function(email, users) {
   for (const id in users) {
     if (users[id].email === email) {
       return id;
@@ -70,7 +70,7 @@ const findUserByEmail = function(email) {
 
 // HELPER FUNCTION #5
 // check to see if the password given matches the password (same email) in the database
-const checkPassword = function(email, password) {
+const checkPassword = function(email, password, users) {
   for (const id in users) {
     if (users[id].email === email && bcrypt.compareSync(password, users[id].hashedPassword)) {
       return true;
@@ -81,7 +81,7 @@ const checkPassword = function(email, password) {
 
 // HELPER FUNCTION #6
 // check to see if shortURL exists in the database
-const checkShortUrl = function(shortURL) {
+const checkShortUrl = function(shortURL, urlDatabase) {
   for (const url in urlDatabase) {
     if(url === shortURL) {
       return true;
@@ -92,7 +92,7 @@ const checkShortUrl = function(shortURL) {
 
 // HELPER FUNCTION #7
 // return the URLs where the userID is equal to the id of the current user
-const urlsForUser = function(id) {
+const urlsForUser = function(id, urlDatabase) {
   // store the URLs that match the id
   const filteredDatabase = {};
   for (const url in urlDatabase) {
@@ -122,7 +122,7 @@ app.get("/hello", (req,res) => {
 app.get("/urls", (req, res) => {
   const id = req.session.user_id;
   // filter through the URL database
-  const filteredDatabase = urlsForUser(id);
+  const filteredDatabase = urlsForUser(id, urlDatabase);
   const templateVars = {
     urls: filteredDatabase,
     user: users[req.session.user_id]
@@ -159,9 +159,14 @@ app.get("/urls/new", (req, res) => {
 
 // route to display long URL along with short URL (+ link to create new URL)
 app.get("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
   const id = req.session.user_id;
+  // if the shortURL does not exist, return error message
+  if (!checkShortUrl(shortURL, urlDatabase)) {
+    return res.status(400).send("This short URL does not exist!");
+  }
   // filter through the URL database
-  const filteredDatabase = urlsForUser(id);
+  const filteredDatabase = urlsForUser(id, urlDatabase);
   const templateVars = {
     urls: filteredDatabase,
     shortURL: req.params.shortURL, 
@@ -175,7 +180,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   // if the shortURL does not exist, return a error message
-  if(checkShortUrl(shortURL)) {
+  if(checkShortUrl(shortURL, urlDatabase)) {
     const longURL = urlDatabase[shortURL].longURL;
     return res.redirect(longURL);
   }
@@ -186,7 +191,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const id = req.session.user_id;
   // filter through the URL database
-  const filteredDatabase = urlsForUser(id);
+  const filteredDatabase = urlsForUser(id, urlDatabase);
   const shortURL = req.params.shortURL;
   // check if shortURL is in the filtered database, if not, throw error
   if (!filteredDatabase[shortURL]) {
@@ -200,7 +205,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   const id = req.session.user_id;
   // filter through the URL database
-  const filteredDatabase = urlsForUser(id);
+  const filteredDatabase = urlsForUser(id, urlDatabase);
   const shortURL = req.params.shortURL;
   console.log(filteredDatabase)
   // check if shortURL is in the filtered database, if not, throw error
@@ -240,7 +245,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email or Password cannot be empty");
   }
   // if someone registers with existing email, send an error message
-  if (findUserByEmail(email)) {
+  if (findUserByEmail(email, users)) {
     return res.status(400).send("Email already exists");
   }
   // use the helper function create a user object
@@ -269,15 +274,15 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   // if email is not in the database, return a 403 status code
-  if(!findUserByEmail(email)) {
+  if(!findUserByEmail(email, users)) {
     return res.status(403).send("Email cannot be found");
   }
   // if password is not correct, return a 403 status code
-  if(!checkPassword(email, password)) {
+  if(!checkPassword(email, password, users)) {
     return res.status(403).send("Wrong password!");
   }
   // find the ID using the helper function
-  const id = findUserByEmail(email);
+  const id = findUserByEmail(email, users);
   req.session.user_id = id;
   res.redirect("/urls");
 });
