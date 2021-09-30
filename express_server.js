@@ -89,8 +89,24 @@ const checkShortUrl = function(shortURL) {
     if(url === shortURL) {
       return true;
     }
-    return false;
   }
+  return false;
+};
+
+// HELPER FUNCTION #7
+// return the URLs where the userID is equal to the id of the current user
+const urlsForUser = function(id) {
+  // store the URLs that match the id
+  const filteredDatabase = {};
+  for (const url in urlDatabase) {
+    if(urlDatabase[url].userID === id) {
+      filteredDatabase[url] = {
+        longURL: urlDatabase[url].longURL,
+        userID: urlDatabase[url].userID
+      }
+    }
+  }
+  return filteredDatabase;
 };
 
 app.get("/", (req, res) => {
@@ -107,12 +123,11 @@ app.get("/hello", (req,res) => {
 
 // route to display a table of the URL Database (long and short URLS)
 app.get("/urls", (req, res) => {
-  // if not logged in, it should display a message
-  // if (!req.cookies["user_id"]) {
-  //   return res.status(400).send("Log in or Register first to view this page");
-  // }
-  const templateVars = { 
-    urls: urlDatabase,
+  const id = req.cookies["user_id"];
+  // filter through the URL database
+  const filteredDatabase = urlsForUser(id);
+  const templateVars = {
+    urls: filteredDatabase,
     user: users[req.cookies["user_id"]]
    };
   res.render("urls_index", templateVars);
@@ -130,7 +145,6 @@ app.post("/urls", (req, res) => {
     longURL: req.body.longURL,
     userID: req.cookies["user_id"]
   }
-  console.log(urlDatabase)
   res.redirect(`/urls/${newShortUrl}`); // redirect to the new URL page
 });
 
@@ -158,24 +172,36 @@ app.get("/urls/:shortURL", (req, res) => {
 
 // route to handle shortURL requests, clicking on the shortURL will lead to the longURL
 app.get("/u/:shortURL", (req, res) => {
-  // if the :shortURL does not exist in the database, throw an error
-  if (!checkShortUrl(req.params.shortURL)) {
-    return res.status(400).send("This shortURL does not exist!");
-  }
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
 // route to remove a URL and redirect to the /urls page
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const id = req.cookies["user_id"];
+  // filter through the URL database
+  const filteredDatabase = urlsForUser(id);
   const shortURL = req.params.shortURL;
+  // check if shortURL is in the filtered database, if not, throw error
+  if (!filteredDatabase[shortURL]) {
+    return res.status(400).send("You cannot delete this.");
+  }
   delete urlDatabase[shortURL]; // delete the shortURL property in the database
   res.redirect("/urls");
 });
 
 // route to update a URL and redirect to the /urls page
 app.post("/urls/:shortURL", (req, res) => {
+  const id = req.cookies["user_id"];
+  // filter through the URL database
+  const filteredDatabase = urlsForUser(id);
   const shortURL = req.params.shortURL;
+  console.log(filteredDatabase)
+  // check if shortURL is in the filtered database, if not, throw error
+  if (!filteredDatabase[shortURL]) {
+    return res.status(400).send("You cannot edit this.");
+  }
   urlDatabase[shortURL].longURL = req.body.longURL; // update the longURL of the shortURL in the database
   res.redirect("/urls");
 });
