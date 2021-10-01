@@ -6,9 +6,11 @@ Enjoy!
 
 ## Final Product
 
-!["screenshot description"](#)
+!["Screenshot of the URLs page"](https://github.com/hyjin123/tinyapp/blob/master/docs/urls-page.png?raw=true)
 
-!["screenshot description"](#)
+!["Screenshot of the individual URL page"](https://github.com/hyjin123/tinyapp/blob/master/docs/urls-show.png?raw=true)
+
+!["Screenshot of the register page"](https://github.com/hyjin123/tinyapp/blob/master/docs/urls-register.png?raw=true)
 
 ## Dependencies
 
